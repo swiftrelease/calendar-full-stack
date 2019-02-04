@@ -1,0 +1,23 @@
+.TimeSlice {
+  height: 9.5%;
+  width: 260px;
+  margin-right: 60px;
+  display: flex;
+  flex-direction: row;
+}
+
+.TimeArea {
+  width: 60px;
+  font-weight: 300;
+  font-size: 16px;
+  color: #777;
+  text-align: center;
+  user-select: none;
+}
+
+.EventArea {
+  width: 200px;
+  height: 100%;
+  display: flex;
+  flex-flow: row;
+}

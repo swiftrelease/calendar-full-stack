@@ -1,0 +1,8 @@
+.CalEvent {
+  position: relative;
+  background-color: #E2ECF5;
+  border-left: 4px solid #6E9ECF;
+  max-width: 200px;
+  padding-left: 4px;
+  font-size: 14px;
+}
