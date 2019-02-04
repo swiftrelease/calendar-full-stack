@@ -1,0 +1,17 @@
+.AddButton {
+  width: 5rem;
+  height: 5rem;
+  position: fixed;
+  bottom: 5%;
+  right: 5%;
+  font-size: 4rem;
+  font-weight: 300;
+  border-radius: 50%;
+  border-style: none;
+  background-color: #E2ECF5;
+  outline: 0;
+}
+
+.AddButton:hover {
+  background-color: #6E9ECF;
+}

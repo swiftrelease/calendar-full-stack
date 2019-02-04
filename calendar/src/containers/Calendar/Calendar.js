@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import classes from './Calendar.module.css';
 
 import TimeSlice from '../../components/TimeSlice/TimeSlice';
+import AddButton from '../../components/UI/AddButton/AddButton';
 
 class Calendar extends Component {
 
@@ -27,6 +28,13 @@ class Calendar extends Component {
     }]
   };
 
+  async componentDidMount() {
+    const eventData = await fetch('http://localhost:5000/api/calendarEvents').then(res => {
+      return res.json();
+    });
+    this.setState({events: eventData});
+  }
+
   calcEventWidth(evnt) {
     let baseWidth = 100;
     let overlappingEventsNum = 0;
@@ -40,7 +48,7 @@ class Calendar extends Component {
   }
 
   getSliceStart(time, small) {
-    let sliceStart = (time > 5 ? (time - 8) * 60 : (time + 5) * 60);
+    let sliceStart = (time > 5 ? (time - 8) * 60 : (time + 4) * 60);
     if (small) sliceStart += 30;
     return sliceStart;
   }
@@ -67,9 +75,10 @@ class Calendar extends Component {
           small={small}
           time={`${time}:${small ? '30' : '00'}`}
           sliceStart={sliceStart}
+          key={`${time}:${small ? '30' : '00'}`}
         />
       ));
-      if (time == 12 && small) time = 0;
+      if (time === 12 && small) time = 0;
       if (small) time++;
       small = !small;
     }
@@ -81,6 +90,7 @@ class Calendar extends Component {
     return (
       <div className={classes.Calendar}>
         {timeSlices}
+        <AddButton />
       </div>
     );
   }
