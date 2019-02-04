@@ -15,6 +15,8 @@ app.use('*', (req, res, next) => {
   next();
 });
 
+app.use(express.json());
+
 app.get('/calendar', (req, res) => {
   fs.readFile(__dirname + '/data/events.json', {encoding: 'utf8'}, (err, data) => {
     if (err) {

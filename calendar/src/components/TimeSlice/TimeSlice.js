@@ -14,9 +14,12 @@ const timeSlice = (props) => {
       const width = e.width;
       return (
         <CalendarEvent
+          click={() => props.selectEvent(e._id)}
           duration={e.duration}
           key={index}
           style={{ offsetTop, height, width }}
+          selected={e.selected ? e.selected : null}
+          delete={e.selected ? (event) => e.deleteHandler(event, e._id) : null}
         >
           {e.title}
         </CalendarEvent>

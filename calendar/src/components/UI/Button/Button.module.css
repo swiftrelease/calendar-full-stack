@@ -1,0 +1,61 @@
+.Button {
+  width: 6rem;
+  height: 2rem;
+  font-size: 14px;
+  border-radius: 20px;
+  border-style: none;
+  outline: 0;
+  user-select: none;
+}
+
+.Red {
+  background-color: #e54d27;
+}
+.Red:hover {
+  background-color: #b22805;
+}
+
+.Green {
+  background-color: #29d86f;
+}
+.Green:hover {
+  background-color: #0fa84c;
+}
+
+.White {
+  background-color: #eee;
+}
+.White:hover {
+  background-color: #ddd;
+}
+
+.DeleteButton {
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background-color: #e54d27;
+  font-weight: 300;
+}
+.DeleteButton:hover {
+  background-color: #b22805;
+}
+
+.AddButton {
+  width: 5rem;
+  height: 5rem;
+  position: fixed;
+  bottom: 5%;
+  right: 5%;
+  font-size: 4rem;
+  font-weight: 300;
+  border-radius: 50%;
+  border-style: none;
+  background-color: #E2ECF5;
+  outline: 0;
+}
+.AddButton:hover {
+  background-color: #6E9ECF;
+}

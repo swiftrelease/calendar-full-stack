@@ -2,7 +2,11 @@ import React, { Component } from 'react';
 import classes from './Calendar.module.css';
 
 import TimeSlice from '../../components/TimeSlice/TimeSlice';
-import AddButton from '../../components/UI/AddButton/AddButton';
+import AddButton from '../../components/UI/Button/AddButton/AddButton';
+import Modal from '../../components/UI/Modal/Modal';
+import AddEventControls from '../../components/AddEventControls/AddEventControls';
+
+const apiUrl = 'http://localhost:5000/api/calendarEvents';
 
 class Calendar extends Component {
 
@@ -25,11 +29,13 @@ class Calendar extends Component {
       start: 30,
       duration: 15,
       title: "Review stuff"
-    }]
+    }],
+    addingEvent: false,
+    selectedEventId: null
   };
 
   async componentDidMount() {
-    const eventData = await fetch('http://localhost:5000/api/calendarEvents').then(res => {
+    const eventData = await fetch(apiUrl).then(res => {
       return res.json();
     });
     this.setState({events: eventData});
@@ -58,7 +64,13 @@ class Calendar extends Component {
     for (let e of this.state.events) {
       if (e.start >= sliceStart && e.start < sliceStart + 30) events.push(e);
     }
-    events = events.map(e => ({ ...e, width: this.calcEventWidth(e) }) );
+    events = events.map(e => {
+      let ev = { ...e, width: this.calcEventWidth(e) };
+      if (ev._id === this.state.selectedEventId) {
+        ev = { ...ev, selected: true, deleteHandler: this.deleteEventHandler };
+      }
+      return ev;
+    });
     return events;
   }
 
@@ -72,6 +84,7 @@ class Calendar extends Component {
       timeSlices.push((
         <TimeSlice
           events={this.getEventsForSlice(sliceStart)}
+          selectEvent={this.selectEventHandler}
           small={small}
           time={`${time}:${small ? '30' : '00'}`}
           sliceStart={sliceStart}
@@ -85,12 +98,62 @@ class Calendar extends Component {
     return timeSlices;
   }
 
+  selectEventHandler = (id) => {
+    if (this.state.selectedEventId === id) {
+      this.setState({selectedEventId: null});
+    } else {
+      this.setState({selectedEventId: id});
+    }
+  };
+
+  addEventButtonClickHandler = () => {
+    this.setState({ addingEvent: true });
+  };
+
+  addEventCancelHandler = () => {
+    this.setState({ addingEvent: false });
+  };
+
+  deleteEventHandler = async (event, id) => {
+    event.stopPropagation();
+    let resp = await fetch(apiUrl, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({id})
+    }).then(res => res.text());
+    console.log(resp);
+  };
+
+  async addEventHandler() {
+    let start = +document.querySelector('input#time').value;
+    let duration = +document.querySelector('input#duration').value;
+    let title = document.querySelector('input#title').value;
+    let payload = JSON.stringify({start, duration, title});
+    console.log(payload);
+    let resp = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: payload
+    }).then(res => res.text());
+    console.log(resp);
+  }
+
   render() {
     const timeSlices = this.setupTimeSlices();
     return (
       <div className={classes.Calendar}>
+        <Modal show={this.state.addingEvent} modalClosed={this.addEventCancelHandler}>
+          <AddEventControls
+            cancel={this.addEventCancelHandler}
+            confirm={this.addEventHandler}
+          />
+        </Modal>
         {timeSlices}
-        <AddButton />
+        <AddButton click={this.addEventButtonClickHandler} />
       </div>
     );
   }
