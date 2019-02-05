@@ -98,12 +98,14 @@ class Calendar extends Component {
     return timeSlices;
   }
 
-  selectEventHandler = (id) => {
-    if (this.state.selectedEventId === id) {
-      this.setState({selectedEventId: null});
-    } else {
-      this.setState({selectedEventId: id});
-    }
+  selectEventHandler = (event, id) => {
+    event.stopPropagation();
+    if (this.state.selectedEventId === id) return;
+    this.setState({selectedEventId: id});
+  };
+
+  deselectEventHandler = () => {
+    this.setState({selectedEventId: null});
   };
 
   addEventButtonClickHandler = () => {
@@ -122,11 +124,22 @@ class Calendar extends Component {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({id})
-    }).then(res => res.text());
-    console.log(resp);
+    });
+    if (resp.status === 200) {
+      let events = [...this.state.events];
+      for (let i = 0; i < events.length; i++) {
+        if (events[i]._id === id) {
+          events.splice(i, 1);
+          this.setState({events});
+          break;
+        }
+      }
+    } else {
+      console.log("error with the request");
+    }
   };
 
-  async addEventHandler() {
+  addEventHandler = async () => {
     let start = +document.querySelector('input#time').value;
     let duration = +document.querySelector('input#duration').value;
     let title = document.querySelector('input#title').value;
@@ -138,14 +151,23 @@ class Calendar extends Component {
         'Content-Type': 'application/json'
       },
       body: payload
-    }).then(res => res.text());
-    console.log(resp);
+    });
+    if (resp.status === 200) {
+      let events = [...this.state.events];
+      events.push({start, duration, title});
+      this.setState({events, addingEvent: false});
+      document.querySelector('input#time').value = "";
+      document.querySelector('input#duration').value = "";
+      document.querySelector('input#title').value = "";
+    } else {
+      console.log("error with the request");
+    }
   }
 
   render() {
     const timeSlices = this.setupTimeSlices();
     return (
-      <div className={classes.Calendar}>
+      <div className={classes.Calendar} onClick={this.deselectEventHandler}>
         <Modal show={this.state.addingEvent} modalClosed={this.addEventCancelHandler}>
           <AddEventControls
             cancel={this.addEventCancelHandler}

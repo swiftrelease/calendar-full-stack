@@ -1,3 +1,17 @@
-label {
+.add-event-controls {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.add-event-controls select {
+  margin: 0 0.2rem 0.8rem 0.2rem;
+}
+
+.add-event-controls label {
   display: block;
+}
+
+.add-event-controls input {
+  display: block;
+  margin: 0.3rem auto;
 }

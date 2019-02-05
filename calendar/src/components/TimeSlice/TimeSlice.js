@@ -14,7 +14,7 @@ const timeSlice = (props) => {
       const width = e.width;
       return (
         <CalendarEvent
-          click={() => props.selectEvent(e._id)}
+          click={(event) => props.selectEvent(event, e._id)}
           duration={e.duration}
           key={index}
           style={{ offsetTop, height, width }}

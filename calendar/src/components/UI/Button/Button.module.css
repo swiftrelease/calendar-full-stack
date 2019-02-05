@@ -43,6 +43,11 @@
   background-color: #b22805;
 }
 
+.Controls {
+  margin: 1rem;
+  text-align: center;
+}
+
 .AddButton {
   width: 5rem;
   height: 5rem;
