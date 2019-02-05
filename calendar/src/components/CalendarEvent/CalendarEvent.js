@@ -18,7 +18,7 @@ const calendarEvent = (props) => {
       }}
     >
       {props.children}
-      {props.selected ? <Button type="DeleteButton" click={props.delete}>x</Button> : null }
+      {props.selected ? <Button classes={["DeleteButton"]} click={props.delete}>x</Button> : null }
     </div>
   );
 };
