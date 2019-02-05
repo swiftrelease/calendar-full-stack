@@ -24,14 +24,14 @@ class AddEventControls extends Component {
           <select id="minutes">
             {this.setupOptions(this.minutes)}
           </select>
-          {/*
-          <label>Time: </label>
-          <input type="text" id="time" />
-          */}
           <label>Duration: </label>
           <input type="text" id="duration" />
+          {this.props.error && this.props.error.type === "duration" ?
+            <label className="warning">{this.props.error.message}</label> : null}
           <label>Title: </label>
           <input type="text" id="title" />
+          {this.props.error && this.props.error.type === "title"
+            ? <label className="warning">{this.props.error.message}</label> : null}
           <Button click={this.props.confirm} classes={["Green", "Controls"]}> Add </Button>
           <Button click={this.props.cancel} classes={["White", "Controls"]}> Cancel </Button>
         </div>

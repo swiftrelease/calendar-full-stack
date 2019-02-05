@@ -121,37 +121,57 @@ class Calendar extends Component {
       body: JSON.stringify({id})
     });
     if (resp.status === 200) {
-<<<<<<< HEAD
-      let respText = await resp.text();
-=======
->>>>>>> origin/ofc
       let events = [...this.state.events];
       for (let i = 0; i < events.length; i++) {
         if (events[i]._id === id) {
           events.splice(i, 1);
-<<<<<<< HEAD
-          break;
-        }
-      }
-      this.setState({events});
-      console.log(respText);
-    } else {
-      console.log("some error");
-=======
           this.setState({events});
           break;
         }
       }
     } else {
       console.log("error with the request");
->>>>>>> origin/ofc
     }
   };
 
   addEventHandler = async () => {
-    let start = +document.querySelector('input#time').value;
+    let hours = +document.querySelector('select#hours').value;
+    let minutes = +document.querySelector('select#minutes').value;
     let duration = +document.querySelector('input#duration').value;
     let title = document.querySelector('input#title').value;
+
+
+    if (isNaN(duration)) {
+      this.setState({addEventError: {
+        type: "duration",
+        message: "Duration has to be a number"
+      }});
+      return;
+    }
+    if (!duration) {
+      this.setState({addEventError: {
+        type: "duration",
+        message: "Please enter a duration greater than 0"
+      }});
+      return;
+    }
+    if (duration < 5 || duration > 300) {
+      this.setState({addEventError: {
+        type: "duration",
+        message: "Duration has to be more than 5 and less than 300"
+      }});
+      return;
+    }
+    if (!title) {
+      this.setState({addEventError: {
+        type: "title",
+        message: "Title cannot be empty"
+      }});
+      return;
+    }
+
+    let start = 0;
+
     let payload = JSON.stringify({start, duration, title});
     console.log(payload);
     let resp = await fetch(apiUrl, {
@@ -181,6 +201,7 @@ class Calendar extends Component {
           <AddEventControls
             cancel={this.addEventCancelHandler}
             confirm={this.addEventHandler}
+            error={this.state.addEventError ? this.state.addEventError : null}
           />
         </Modal>
         {timeSlices}
