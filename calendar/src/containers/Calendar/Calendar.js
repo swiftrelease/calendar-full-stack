@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import classes from './Calendar.module.css';
 
 import TimeSlice from '../../components/TimeSlice/TimeSlice';
+import CalendarEvent from '../../components/CalendarEvent/CalendarEvent';
 import AddButton from '../../components/UI/Button/AddButton/AddButton';
 import Modal from '../../components/UI/Modal/Modal';
 import AddEventControls from '../../components/AddEventControls/AddEventControls';
@@ -9,12 +10,6 @@ import AddEventControls from '../../components/AddEventControls/AddEventControls
 const apiUrl = 'http://localhost:5000/api/calendarEvents';
 
 class Calendar extends Component {
-
-  // {
-  //   start: 15,
-  //   duration: 10,
-  //   title: "Brush teeth"
-  // },
 
   state = {
     events: [{
@@ -122,8 +117,21 @@ class Calendar extends Component {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({id})
-    }).then(res => res.text());
-    console.log(resp);
+    });
+    if (resp.status === 200) {
+      let respText = await resp.text();
+      let events = [...this.state.events];
+      for (let i = 0; i < events.length; i++) {
+        if (events[i]._id === id) {
+          events.splice(i, 1);
+          break;
+        }
+      }
+      this.setState({events});
+      console.log(respText);
+    } else {
+      console.log("some error");
+    }
   };
 
   async addEventHandler() {
