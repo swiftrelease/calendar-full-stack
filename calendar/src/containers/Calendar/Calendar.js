@@ -12,38 +12,51 @@ const apiUrl = 'http://localhost:5000/api/calendarEvents';
 class Calendar extends Component {
 
   state = {
-    events: [{
-      start: 0,
-      duration: 15,
-      title: "Exercise"
-    }, {
-      start: 25,
-      duration: 30,
-      title: "Travel to work"
-    }, {
-      start: 30,
-      duration: 15,
-      title: "Review stuff"
-    }],
+    events: [],
     addingEvent: false,
-    selectedEventId: null
+    selectedEventId: null,
+    addEventError: null,
+    networkError: null
   };
 
+  getEventData = async () => {
+    const request = await fetch(apiUrl);
+    if (request.status === 200) {
+      const data = await request.json();
+      return data;
+    } else {
+      this.setState({networkError: `Failed to connect to the server: ${request.status}.`});
+    }
+  }
+
   async componentDidMount() {
-    const eventData = await fetch(apiUrl).then(res => {
-      return res.json();
-    });
-    this.setState({events: eventData});
+    const eventData = await this.getEventData();
+    if (eventData) {
+      this.setState({events: eventData});
+    }
   }
 
   calcEventWidth(evnt) {
     let baseWidth = 100;
     let overlappingEventsNum = 0;
+    let overlappingEvents = [];
     for (let e of this.state.events) {
-      if ( (evnt.start <= e.start && evnt.start + evnt.duration > e.start)
-        || (e.start <= evnt.start && e.start + e.duration > evnt.start) ) {
+      if (eventsOverlap(evnt, e)) {
+             overlappingEvents.push(e);
              overlappingEventsNum++;
            }
+    }
+    for (let i = 0; i < overlappingEvents.length - 1; i++) {
+      for (let j = i + 1; j < overlappingEvents.length; j++) {
+        if (!eventsOverlap(overlappingEvents[i], overlappingEvents[j])) {
+          overlappingEventsNum--;
+        }
+      }
+    }
+
+    function eventsOverlap(e1, e2) {
+      return ( (e1.start <= e2.start && e1.start + e1.duration > e2.start)
+        || (e2.start <= e1.start && e2.start + e2.duration > e1.start) );
     }
     return (baseWidth / overlappingEventsNum) + '%';
   }
@@ -111,6 +124,10 @@ class Calendar extends Component {
     this.setState({ addingEvent: false });
   };
 
+  closeErrorModalHandler = () => {
+    this.setState({ networkError: null });
+  };
+
   deleteEventHandler = async (event, id) => {
     event.stopPropagation();
     let resp = await fetch(apiUrl, {
@@ -170,10 +187,11 @@ class Calendar extends Component {
       return;
     }
 
-    let start = 0;
+    if (hours < 5) hours += 12;
+
+    let start = (hours - 8) * 60 + minutes;
 
     let payload = JSON.stringify({start, duration, title});
-    console.log(payload);
     let resp = await fetch(apiUrl, {
       method: 'POST',
       headers: {
@@ -182,12 +200,8 @@ class Calendar extends Component {
       body: payload
     });
     if (resp.status === 200) {
-      let events = [...this.state.events];
-      events.push({start, duration, title});
-      this.setState({events, addingEvent: false});
-      document.querySelector('input#time').value = "";
-      document.querySelector('input#duration').value = "";
-      document.querySelector('input#title').value = "";
+      const eventData = await this.getEventData();
+      this.setState({events: eventData, addingEvent: false, addEventError: null});
     } else {
       console.log("error with the request");
     }
@@ -197,12 +211,18 @@ class Calendar extends Component {
     const timeSlices = this.setupTimeSlices();
     return (
       <div className={classes.Calendar} onClick={this.deselectEventHandler}>
-        <Modal show={this.state.addingEvent} modalClosed={this.addEventCancelHandler}>
-          <AddEventControls
-            cancel={this.addEventCancelHandler}
-            confirm={this.addEventHandler}
-            error={this.state.addEventError ? this.state.addEventError : null}
-          />
+        <Modal
+          show={this.state.addingEvent || this.state.networkError}
+          modalClosed={this.state.networkError ? this.closeErrorModalHandler : this.addEventCancelHandler}
+        >
+          {this.state.addingEvent ?
+            <AddEventControls
+              cancel={this.addEventCancelHandler}
+              confirm={this.addEventHandler}
+              error={this.state.addEventError}
+            /> : null}
+
+          {this.state.networkError ? <h3>{this.state.networkError}</h3> : null}
         </Modal>
         {timeSlices}
         <AddButton click={this.addEventButtonClickHandler} />

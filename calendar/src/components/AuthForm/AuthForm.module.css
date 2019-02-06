@@ -1,0 +1,32 @@
+.Auth {
+  width: 60%;
+  margin: 33% auto;
+  text-align: center;
+}
+
+.Auth label {
+  display: block;
+  margin: 1rem auto;
+}
+
+.Auth label.warning {
+  font-size: 10px;
+  color: #e54d27;
+  margin: 0 0 1rem 0;
+}
+
+.Auth input {
+  padding: 0.2rem;
+  border-radius: 5px;
+  border: 1px solid #999;
+  outline: none;
+}
+
+.Auth input:focus {
+  border: 1px solid black;
+}
+
+.Auth button {
+  display: block;
+  margin: 1.5rem auto;
+}
