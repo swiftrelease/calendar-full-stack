@@ -10,25 +10,17 @@ const app = express();
 
 const port = 5000;
 
+app.use(express.static(__dirname + '/build'));
+
 app.use('*', (req, res, next) => {
   res.set('Access-Control-Allow-Origin', '*');
   next();
 });
 
+
 app.use(express.json());
 
-app.get('/calendar', (req, res) => {
-  fs.readFile(__dirname + '/data/events.json', {encoding: 'utf8'}, (err, data) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    res.set('Content-Type', 'application/json');
-    res.send(JSON.parse(data));
-  });
-});
-
-mongoose.connect(config.getDbConnectionString());
+mongoose.connect(config.getDbConnectionString(), {useNewUrlParser: true});
 
 setupController(app);
 apiController(app);

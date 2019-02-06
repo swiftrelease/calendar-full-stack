@@ -1,4 +1,4 @@
-var CalendarEvents = require('../models/calendarEventModel');
+var CalendarEvents = require('../models/calendarEventModel').CalendarEvents;
 
 module.exports = function(app) {
   app.get('/api/setupCalendarEvents', function(req, res) {

@@ -7,7 +7,10 @@ import AddButton from '../../components/UI/Button/AddButton/AddButton';
 import Modal from '../../components/UI/Modal/Modal';
 import AddEventControls from '../../components/AddEventControls/AddEventControls';
 
-const apiUrl = 'http://localhost:5000/api/calendarEvents';
+const HOSTNAME = 'localhost';
+const PORT = '5000';
+
+const apiUrl = `http://${HOSTNAME}:${PORT}/api/calendar`;
 
 class Calendar extends Component {
 

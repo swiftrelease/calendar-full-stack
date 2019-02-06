@@ -5,7 +5,11 @@ const Schema = mongoose.Schema;
 const userSchema = new Schema({
   uname: String,
   pass: String,
-  events: Array
+  events: [{
+    start: Number,
+    duration: Number,
+    title: String
+  }]
 });
 
 var Users = mongoose.model('Users', userSchema);
