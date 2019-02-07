@@ -1,7 +1,8 @@
-var CalendarEvents = require('../models/calendarEventModel').CalendarEvents;
+var CalendarEvents = require('../models/calendarEventModel');
+const Users = require('../models/userModel');
 
 module.exports = function(app) {
-  app.get('/api/setupCalendarEvents', function(req, res) {
+  app.get('/api/setup', function(req, res) {
     // seed database
     const starterEvents = [
       {
@@ -42,8 +43,18 @@ module.exports = function(app) {
         title: "Push up branch"
       }
     ];
-    CalendarEvents.create(starterEvents, function(err, results) {
+    const starterUser = {
+      uname: 'admin',
+      pass: '00810cf8b94d6fcb9c5de484d3bec4187620b3e2876e59aab90d852fe0f18fb6',
+      authToken: '123',
+      apiToken: '123',
+      events: starterEvents
+    }
+    Users.create(starterUser, function(err, results) {
       res.send(results);
     });
+    // CalendarEvents.create(starterEvents, function(err, results) {
+    //   res.send(results);
+    // });
   });
 }

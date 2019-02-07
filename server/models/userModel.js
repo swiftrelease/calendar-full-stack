@@ -5,6 +5,8 @@ const Schema = mongoose.Schema;
 const userSchema = new Schema({
   uname: String,
   pass: String,
+  authToken: String,
+  apiToken: String,
   events: [{
     start: Number,
     duration: Number,

@@ -1,17 +1,48 @@
 import React, { Component } from 'react';
 import classes from './App.module.css';
+import shajs from 'sha.js';
 
 import Calendar from './Calendar/Calendar';
 import AuthForm from '../components/AuthForm/AuthForm';
 
+const HOSTNAME = 'localhost';
+const PORT = '5000';
+
+const authUrl = `http://${HOSTNAME}:${PORT}/auth`;
+
 class App extends Component {
 
-  creds = { admin: 'changeit' };
+  // creds = { admin: 'changeit' };
 
   state = {
     authorized: false,
-    authError: null
+    authError: null,
+    apiToken: null
   };
+
+  componentDidMount = async () => {
+    let cookies = document.cookie.split('; ');
+    let authToken = null;
+    for (let c of cookies) {
+      if (c.split('=')[0] === 'authToken') {
+        authToken = c.split('=')[1];
+        break;
+      }
+    }
+    if (!authToken) return;
+
+    let resp = await fetch(authUrl, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({authToken})
+    });
+    if (resp.status === 200) {
+      let data = await resp.json();
+      if (data.uname && data.apiToken) {
+        this.setState({authorized: true, uname: data.uname, apiToken: data.apiToken});
+      }
+    }
+  }
 
   setAuthError = (condition, error) => {
     if (condition) {
@@ -32,14 +63,57 @@ class App extends Component {
       return;
     }
 
-    if (uname in this.creds && this.creds[uname] === pass) {
-      this.setState({authorized: true, authError: null});
-    } else if (uname in this.creds) {
-      this.setState({authError: {type: 'pass', message: 'Incorrect password'}});
+
+    // if (uname in this.creds && this.creds[uname] === pass) {
+    //   this.setState({authorized: true, authError: null});
+    // } else if (uname in this.creds) {
+    //   this.setState({authError: {type: 'pass', message: 'Incorrect password'}});
+    // } else {
+    //   this.setState({authError: {type: 'uname', message: 'User does not exist'}});
+    // }
+    let passHash = shajs('sha256').update(pass).digest('hex');
+    console.log(`payload: ${uname}, ${passHash}`);
+    let resp = await fetch(authUrl, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({uname, pass: passHash})
+    });
+    console.log(resp);
+    if (resp.status === 200) {
+      let data = await resp.json();
+      if (!data.action || !data.authToken || !data.apiToken) {
+        if (data.error) {
+          this.setState({authError: {type: 'pass', message: data.error}});
+        } else {
+          this.setState({authError: {type: 'pass', message: 'Unknown auth error'}});
+        }
+      } else {
+        if (data.action === 'register') {
+          document.cookie = `authToken=${data.authToken}`;
+          this.setState({authorized: true, apiToken: data.apiToken, uname});
+        }
+        if (data.action === 'login') {
+          document.cookie = `authToken=${data.authToken}`;
+          this.setState({authorized: true, apiToken: data.apiToken, uname});
+        }
+      }
     } else {
-      this.setState({authError: {type: 'uname', message: 'User does not exist'}});
+
+      let data = await resp.json();
+      console.log(data);
+      if (data.error) {
+        this.setState({authError: {type: 'pass', message: data.error}});
+      } else {
+        this.setState({authError: {type: 'pass', message: 'Unknown auth error'}});
+      }
+      return;
     }
   };
+
+  signOutHandler = () => {
+    document.cookie = `authToken=;expires=${new Date(0).toUTCString()}`;
+    this.setState({authorized: false, apiToken: null});
+  }
 
 
   render() {
@@ -49,6 +123,8 @@ class App extends Component {
           <Calendar
             timeStart={8}
             timeSlicesAmount={19}
+            apiToken={this.state.apiToken}
+            signOut={this.signOutHandler}
           /> :
           <AuthForm
             error={this.state.authError}

@@ -64,3 +64,9 @@
 .AddButton:hover {
   background-color: #6E9ECF;
 }
+
+.SignOut {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+}

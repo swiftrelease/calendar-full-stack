@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import classes from './Calendar.module.css';
 
 import TimeSlice from '../../components/TimeSlice/TimeSlice';
-import CalendarEvent from '../../components/CalendarEvent/CalendarEvent';
+// import CalendarEvent from '../../components/CalendarEvent/CalendarEvent';
 import AddButton from '../../components/UI/Button/AddButton/AddButton';
+import Button from '../../components/UI/Button/Button';
 import Modal from '../../components/UI/Modal/Modal';
 import AddEventControls from '../../components/AddEventControls/AddEventControls';
 
@@ -23,7 +24,12 @@ class Calendar extends Component {
   };
 
   getEventData = async () => {
-    const request = await fetch(apiUrl);
+    const request = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'X-ApiToken': this.props.apiToken
+      }
+    });
     if (request.status === 200) {
       const data = await request.json();
       return data;
@@ -136,7 +142,8 @@ class Calendar extends Component {
     let resp = await fetch(apiUrl, {
       method: 'DELETE',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-ApiToken': this.props.apiToken
       },
       body: JSON.stringify({id})
     });
@@ -198,7 +205,8 @@ class Calendar extends Component {
     let resp = await fetch(apiUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-ApiToken': this.props.apiToken
       },
       body: payload
     });
@@ -228,6 +236,7 @@ class Calendar extends Component {
           {this.state.networkError ? <h3>{this.state.networkError}</h3> : null}
         </Modal>
         {timeSlices}
+        <Button click={this.props.signOut} classes={['SignOut']}> Sign Out </Button>
         <AddButton click={this.addEventButtonClickHandler} />
       </div>
     );
