@@ -8,16 +8,24 @@ const timeSlice = (props) => {
   let events = null;
 
   if (props.events) {
+    let prevHeight = [];
     events = props.events.map((e, index) => {
-      const offsetTop = (e.start - props.sliceStart) * 10 / 3 + '%';
+      const top = (e.start - props.sliceStart) * 10 / 3 + '%';
       const height = e.duration * 10 / 3 + '%';
+      let offsetTop = `calc(${top}`;
+      for (let val of prevHeight) {
+        offsetTop += ` - ${val}`;
+      }
+      offsetTop += ')';
+      prevHeight.push(height);
       const width = e.width;
+      const left = e.left;
       return (
         <CalendarEvent
           click={(event) => props.selectEvent(event, e._id)}
           duration={e.duration}
           key={index}
-          style={{ offsetTop, height, width }}
+          style={{ offsetTop, height, width, left }}
           selected={e.selected ? e.selected : null}
           delete={e.selected ? (event) => e.deleteHandler(event, e._id) : null}
         >

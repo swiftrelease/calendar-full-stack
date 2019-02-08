@@ -14,7 +14,8 @@ const calendarEvent = (props) => {
       style={{
         width: props.style.width,
         height: props.style.height,
-        top: props.style.offsetTop
+        top: props.style.offsetTop,
+        left: props.style.left
       }}
     >
       {props.children}

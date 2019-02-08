@@ -18,6 +18,6 @@
 .EventArea {
   width: 200px;
   height: 100%;
-  display: flex;
-  flex-flow: row;
+  /* display: flex;
+  flex-flow: row; */
 }

@@ -23,13 +23,16 @@ module.exports = function(app) {
 
   app.get('/api/calendar', function(req, res) {
     Users.findOne({apiToken: req.headers['x-apitoken']}, function(err, user) {
-      if(err) throw err;
+      if(err) {
+        res.status(404).json({error: 'No user found'});
+        return;
+      }
       res.send(user.events);
     });
   });
 
   app.post('/api/calendar', function(req, res) {
-    console.log('inside post handler');
+    // console.log('inside post handler');
     var newCalEvent = {
       start: req.body.start,
       duration: req.body.duration,
@@ -53,32 +56,36 @@ module.exports = function(app) {
   });
 
   app.delete('/api/calendar', function(req, res) {
-    Users.findOneAndUpdate({apiToken: req.headers['x-apitoken']},
-            {events: {$pull: {_id: req.body.id}}}, function(err, data) {
-              if(err) throw err;
-              res.status(200).send("[delete] Success");
-            });
+    Users.findOne({apiToken: req.headers['x-apitoken']}, function(err, user) {
+      if(err) throw err;
+      if(!user) {
+        res.status(404).json('No user found');
+        return;
+      }
+      const updatedEvents = [...user.events];
+      var eventFound = false;
+      for(let i = 0; i < updatedEvents.length; i++) {
+        if(String(updatedEvents[i]._id) === req.body.id) {
+          updatedEvents.splice(i, 1);
+          eventFound = true;
+          break;
+        }
+      }
+      user = {...user, events: updatedEvents};
+      console.log(user);
+
+      if(eventFound) {
+        Users.findOneAndUpdate({apiToken: req.headers['x-apitoken']},
+          {$set: {events: updatedEvents}}, function(err, user) {
+            if(err) throw err;
+            res.status(200).send("[delete] Success");
+          });
+      }
+    });
 
     // CalendarEvents.findByIdAndRemove(req.body.id, function(err) {
     //   if(err) throw err;
     //   res.send("[delete] Success");
     // });
   });
-
-  // app.get('api/export', function(req, res) {
-  //   CalendarEvents.find({}, function(err, calEvents) {
-  //     if(err) throw err;
-  //     new Promise(function(resolve, reject) {
-  //       fs.mkdir(`../user_data/admin`, err => {
-  //         if(err) reject(err);
-  //         resolve();
-  //       });
-  //     }).then(() => {
-  //       CalendarEvents.find({}, function(err, calEvents) {
-  //         if(err) throw err;
-  //
-  //       });
-  //     }).catch(err => console.log(err));
-  //   });
-  // });
 };

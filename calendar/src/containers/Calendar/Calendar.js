@@ -23,6 +23,8 @@ class Calendar extends Component {
     networkError: null
   };
 
+  offsetEvents = [];
+
   getEventData = async () => {
     const request = await fetch(apiUrl, {
       method: 'GET',
@@ -45,30 +47,58 @@ class Calendar extends Component {
     }
   }
 
-  calcEventWidth(evnt) {
+  eventsOverlap(e1, e2) {
+    return ( (e1.start <= e2.start && e1.start + e1.duration > e2.start)
+      || (e2.start <= e1.start && e2.start + e2.duration > e1.start) );
+  }
+
+  containsOffsetEvent = (evnt) => {
+    for (let e of this.offsetEvents) {
+      if (evnt._id === e.__id) return true;
+    }
+    return false;
+  };
+
+  calcEventWidth = (evnt) => {
     let baseWidth = 100;
-    let overlappingEventsNum = 0;
+    let baseOffset = 0;
+    let overlappingEventsNum = 1;
     let overlappingEvents = [];
     for (let e of this.state.events) {
-      if (eventsOverlap(evnt, e)) {
+      if (this.eventsOverlap(evnt, e) && evnt._id !== e._id) {
              overlappingEvents.push(e);
              overlappingEventsNum++;
            }
     }
     for (let i = 0; i < overlappingEvents.length - 1; i++) {
       for (let j = i + 1; j < overlappingEvents.length; j++) {
-        if (!eventsOverlap(overlappingEvents[i], overlappingEvents[j])) {
+        if (!this.eventsOverlap(overlappingEvents[i], overlappingEvents[j])) {
           overlappingEventsNum--;
         }
       }
     }
 
-    function eventsOverlap(e1, e2) {
-      return ( (e1.start <= e2.start && e1.start + e1.duration > e2.start)
-        || (e2.start <= e1.start && e2.start + e2.duration > e1.start) );
+    for (let e of overlappingEvents) {
+      if ( (evnt.start > e.start) ||
+      (evnt.start === e.start && !this.containsOffsetEvent(e)) ) {
+        baseOffset++;
+        this.offsetEvents.push(e);
+      }
     }
-    return (baseWidth / overlappingEventsNum) + '%';
-  }
+
+    let offsetPercent = (baseWidth / overlappingEventsNum) * baseOffset;
+    let offsetLeft;
+    if (offsetPercent) {
+      offsetLeft = `${offsetPercent}%`;
+    } else {
+      offsetLeft = '0';
+    }
+
+    return {
+      width: `calc(${baseWidth / overlappingEventsNum}% - 12px)`,
+      left: offsetLeft
+    };
+  };
 
   getSliceStart(time, small) {
     let sliceStart = (time > 5 ? (time - 8) * 60 : (time + 4) * 60);
@@ -82,7 +112,8 @@ class Calendar extends Component {
       if (e.start >= sliceStart && e.start < sliceStart + 30) events.push(e);
     }
     events = events.map(e => {
-      let ev = { ...e, width: this.calcEventWidth(e) };
+      let styles = this.calcEventWidth(e);
+      let ev = { ...e, width: styles.width, left: styles.left };
       if (ev._id === this.state.selectedEventId) {
         ev = { ...ev, selected: true, deleteHandler: this.deleteEventHandler };
       }
@@ -175,13 +206,6 @@ class Calendar extends Component {
       }});
       return;
     }
-    if (!duration) {
-      this.setState({addEventError: {
-        type: "duration",
-        message: "Please enter a duration greater than 0"
-      }});
-      return;
-    }
     if (duration < 5 || duration > 300) {
       this.setState({addEventError: {
         type: "duration",
@@ -214,9 +238,44 @@ class Calendar extends Component {
       const eventData = await this.getEventData();
       this.setState({events: eventData, addingEvent: false, addEventError: null});
     } else {
-      console.log("error with the request");
+      console.log("HTTP request error");
     }
   }
+
+  exportJsonHandler = async () => {
+    let events = [];
+    for (let e of this.state.events) {
+      events.push({
+        start: e.start,
+        duration: e.duration,
+        title: e.title
+      });
+    }
+    for (let i = 0; i < events.length - 1; i++) {
+      for (let j = i + 1; j < events.length; j++) {
+        if (events[j].start < events[i].start) {
+          let tmp = events[i];
+          events[i] = events[j];
+          events[j] = tmp;
+        }
+      }
+    }
+    let data = encode(JSON.stringify(events, null, 2));
+    let blob = new Blob([data], {type: 'application/octet-stream'});
+    let url = URL.createObjectURL(blob);
+    let link = document.createElement('a');
+    link.href = url;
+    link.download = 'events.json';
+    link.click();
+
+    function encode(s) {
+      var out = [];
+      for (let i = 0; i < s.length; i++) {
+          out[i] = s.charCodeAt(i);
+      }
+      return new Uint8Array(out);
+    }
+  };
 
   render() {
     const timeSlices = this.setupTimeSlices();
@@ -236,7 +295,8 @@ class Calendar extends Component {
           {this.state.networkError ? <h3>{this.state.networkError}</h3> : null}
         </Modal>
         {timeSlices}
-        <Button click={this.props.signOut} classes={['SignOut']}> Sign Out </Button>
+        <Button click={this.props.signOut} classes={['White', 'SignOut']}> Sign Out </Button>
+        <Button click={this.exportJsonHandler} classes={['White', 'Export']}> ⇩ </Button>
         <AddButton click={this.addEventButtonClickHandler} />
       </div>
     );

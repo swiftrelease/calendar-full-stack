@@ -13,6 +13,10 @@ class AddEventControls extends Component {
     return values.map(value => <option value={value} key={value}>{value}</option>);
   }
 
+  onEnter = (event) => {
+    if (event.key === 'Enter') this.props.confirm();
+  }
+
   render() {
     return (
       <Aux>
@@ -25,11 +29,11 @@ class AddEventControls extends Component {
             {this.setupOptions(this.minutes)}
           </select>
           <label>Duration: </label>
-          <input type="text" id="duration" />
+          <input type="text" id="duration" onKeyDown={this.onEnter} />
           {this.props.error && this.props.error.type === "duration" ?
             <label className="warning">{this.props.error.message}</label> : null}
           <label>Title: </label>
-          <input type="text" id="title" />
+          <input type="text" id="title" onKeyDown={this.onEnter} />
           {this.props.error && this.props.error.type === "title"
             ? <label className="warning">{this.props.error.message}</label> : null}
           <Button click={this.props.confirm} classes={["Green", "Controls"]}> Add </Button>

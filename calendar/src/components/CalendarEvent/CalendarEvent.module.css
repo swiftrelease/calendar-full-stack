@@ -3,9 +3,11 @@
   background-color: #E2ECF5;
   border-left: 4px solid #6E9ECF;
   max-width: 200px;
-  padding-left: 4px;
+  padding: 0 4px;
   font-size: 14px;
-  
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .Selected {

@@ -52,8 +52,8 @@
   width: 5rem;
   height: 5rem;
   position: fixed;
-  bottom: 5%;
-  right: 5%;
+  bottom: 3rem;
+  right: 3rem;
   font-size: 4rem;
   font-weight: 300;
   border-radius: 50%;
@@ -69,4 +69,17 @@
   position: absolute;
   top: 2rem;
   right: 2rem;
+}
+
+.Export {
+  position: fixed;
+  width: 5rem;
+  height: 5rem;
+  bottom: 10rem;
+  right: 3rem;
+  font-size: 4rem;
+  font-weight: 300;
+  border-radius: 50%;
+  border-style: none;
+  outline: 0;
 }

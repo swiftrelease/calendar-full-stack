@@ -72,13 +72,13 @@ class App extends Component {
     //   this.setState({authError: {type: 'uname', message: 'User does not exist'}});
     // }
     let passHash = shajs('sha256').update(pass).digest('hex');
-    console.log(`payload: ${uname}, ${passHash}`);
+    // console.log(`payload: ${uname}, ${passHash}`);
     let resp = await fetch(authUrl, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({uname, pass: passHash})
     });
-    console.log(resp);
+    // console.log(resp);
     if (resp.status === 200) {
       let data = await resp.json();
       if (!data.action || !data.authToken || !data.apiToken) {
@@ -100,7 +100,7 @@ class App extends Component {
     } else {
 
       let data = await resp.json();
-      console.log(data);
+      // console.log(data);
       if (data.error) {
         this.setState({authError: {type: 'pass', message: data.error}});
       } else {
