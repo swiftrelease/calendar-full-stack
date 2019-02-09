@@ -1,4 +1,3 @@
-var CalendarEvents = require('../models/calendarEventModel');
 const Users = require('../models/userModel');
 
 module.exports = function(app) {
@@ -53,8 +52,5 @@ module.exports = function(app) {
     Users.create(starterUser, function(err, results) {
       res.send(results);
     });
-    // CalendarEvents.create(starterEvents, function(err, results) {
-    //   res.send(results);
-    // });
   });
 }

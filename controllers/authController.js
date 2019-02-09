@@ -28,7 +28,6 @@ module.exports = function(app) {
     Users.findOne({uname: req.body.uname}, function(err, user) {
       if(err) throw err;
       if(!user) {
-        // console.log('no user');
         const authToken = uuidv1();
         const apiToken = uuidv1();
         Users.create({

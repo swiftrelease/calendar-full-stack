@@ -1,5 +1,4 @@
 const fs = require('fs');
-const CalendarEvents = require('../models/calendarEventModel');
 const Users = require('../models/userModel');
 
 
@@ -32,7 +31,6 @@ module.exports = function(app) {
   });
 
   app.post('/api/calendar', function(req, res) {
-    // console.log('inside post handler');
     var newCalEvent = {
       start: req.body.start,
       duration: req.body.duration,
@@ -43,16 +41,6 @@ module.exports = function(app) {
       if(err) throw err;
       res.status(200).send('[post] Success');
     });
-
-    // var newCalEvent = CalendarEvents({
-    //   start: req.body.start,
-    //   duration: req.body.duration,
-    //   title: req.body.title
-    // });
-    // newCalEvent.save(function(err) {
-    //   if(err) throw err;
-    //   res.send("[post] Success");
-    // });
   });
 
   app.delete('/api/calendar', function(req, res) {
@@ -72,7 +60,6 @@ module.exports = function(app) {
         }
       }
       user = {...user, events: updatedEvents};
-      console.log(user);
 
       if(eventFound) {
         Users.findOneAndUpdate({apiToken: req.headers['x-apitoken']},
@@ -83,9 +70,5 @@ module.exports = function(app) {
       }
     });
 
-    // CalendarEvents.findByIdAndRemove(req.body.id, function(err) {
-    //   if(err) throw err;
-    //   res.send("[delete] Success");
-    // });
   });
 };

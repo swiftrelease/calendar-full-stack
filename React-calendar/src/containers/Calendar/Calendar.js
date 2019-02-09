@@ -23,7 +23,7 @@ class Calendar extends Component {
     networkError: null
   };
 
-  offsetEvents = [];
+  styledEvents = [];
 
   getEventData = async () => {
     const request = await fetch(apiUrl, {
@@ -38,31 +38,12 @@ class Calendar extends Component {
     } else {
       this.setState({networkError: `Failed to connect to the server: ${request.status}.`});
     }
-  }
+  };
 
-  async componentDidMount() {
+  componentDidMount = async () => {
     const eventData = await this.getEventData();
-    if (eventData) {
-      for (let evnt of eventData) {
-        let baseWidth = 100;
-        let overlappingEventsNum = 1;
-        let overlappingEvents = [];
-        for (let e of eventData) {
-          if (this.eventsOverlap(evnt, e) && evnt._id !== e._id) {
-                 overlappingEvents.push(e);
-                 overlappingEventsNum++;
-               }
-        }
-        for (let i = 0; i < overlappingEvents.length - 1; i++) {
-          for (let j = i + 1; j < overlappingEvents.length; j++) {
-            if (!this.eventsOverlap(overlappingEvents[i], overlappingEvents[j])) {
-              overlappingEventsNum--;
-            }
-          }
-        }
-        evnt.widthPercent = baseWidth / overlappingEventsNum;
-      }
 
+    if (eventData) {
       this.setState({events: eventData});
     }
   }
@@ -74,57 +55,84 @@ class Calendar extends Component {
 
   containsOffsetEvent = (evnt) => {
     for (let e of this.offsetEvents) {
-      console.log(e._id, evnt._id);
       if (evnt._id === e._id) return true;
     }
     return false;
   };
 
-  calcEventStyle = (evnt) => {
-    let baseWidth = 100;
-    let baseOffset = 0;
-    let overlappingEventsNum = 1;
-    let overlappingEvents = [];
-    for (let e of this.state.events) {
-      if (this.eventsOverlap(evnt, e) && evnt._id !== e._id) {
-             overlappingEvents.push(e);
-             overlappingEventsNum++;
-           }
-    }
-    for (let i = 0; i < overlappingEvents.length - 1; i++) {
-      for (let j = i + 1; j < overlappingEvents.length; j++) {
-        if (!this.eventsOverlap(overlappingEvents[i], overlappingEvents[j])) {
-          overlappingEventsNum--;
+  setStyledEvents = () => {
+    let eventData = [...this.state.events];
+
+    // Sort
+    for (let i = 0; i < eventData.length - 1; i++) {
+      for (let j = i + 1; j < eventData.length; j++) {
+        if (eventData[i].start > eventData[j].start) {
+          let temp = eventData[i];
+          eventData[i] = eventData[j];
+          eventData[j] = temp;
         }
       }
     }
-    // console.log('event:');
-    // console.log(evnt);
-    // console.log('overlappingEvents:');
-    // console.log(overlappingEvents);
-    // console.log('offsetEvents');
-    // console.log(this.offsetEvents);
-    for (let e of overlappingEvents) {
-      if ( (evnt.start > e.start) ||
-      (evnt.start === e.start && !this.containsOffsetEvent(e)) ) {
-        baseOffset++;
-        this.offsetEvents.push(e);
+
+    // Store collisions for each event
+    for (let i = 0; i < eventData.length; i++) {
+      eventData[i].overlappingEvents = [];
+      eventData[i].overlappingEventsBefore = [];
+      for (let j = 0; j < eventData.length; j++) {
+        if (this.eventsOverlap(eventData[i], eventData[j])) {
+          eventData[i].overlappingEvents.push(j);
+          if (i > j) eventData[i].overlappingEventsBefore.push(j);
+        }
       }
     }
 
-    let offsetPercent = (baseWidth / overlappingEventsNum) * baseOffset;
-    let offsetLeft;
-    if (offsetPercent) {
-      offsetLeft = `${offsetPercent}%`;
-    } else {
-      offsetLeft = '0';
+    // Magic starts here
+    for (let i = 0; i < eventData.length; i++) {
+      let evnt = eventData[i];
+      if (i > 0 && evnt.overlappingEventsBefore.length > 0) {
+        if (eventData[i - 1].column > 0) {
+          for (let j = 0; j < eventData[i - 1].column; j++) {
+            if (evnt.overlappingEventsBefore.indexOf(i - (j + 2)) === -1) {
+              evnt.column = eventData[i - (j + 2)].column;
+            }
+          }
+          if (typeof evnt.column === 'undefined') evnt.column = eventData[i - 1].column + 1;
+        } else {
+          let column = 0;
+          for (let j = 0; j < evnt.overlappingEventsBefore.length; j++) {
+            if (eventData[evnt.overlappingEventsBefore[evnt.overlappingEventsBefore.length - 1 - j]].column === column) {
+              column++;
+            }
+          }
+          evnt.column = column;
+        }
+      } else {
+        evnt.column = 0;
+      }
     }
 
-    return {
-      width: `calc(${baseWidth / overlappingEventsNum}% - 12px)`,
-      left: offsetLeft
-    };
-  };
+    for (let i = 0; i < eventData.length; i++) {
+      eventData[i].totalColumns = 0;
+      if (eventData[i].overlappingEvents.length > 1) {
+        let conflictGroup=[];
+        let conflictingColumns=[];
+        addConflictsToGroup(eventData[i]);
+        function addConflictsToGroup(e) {
+          for (let k = 0; k < e.overlappingEvents.length; k++) {
+            if (conflictGroup.indexOf(e.overlappingEvents[k]) === -1) {
+              conflictGroup.push(e.overlappingEvents[k]);
+              conflictingColumns.push(eventData[e.overlappingEvents[k]].column);
+              addConflictsToGroup(eventData[e.overlappingEvents[k]]);
+            }
+          }
+        }
+        eventData[i].totalColumns = Math.max(...conflictingColumns);
+      }
+      eventData[i].width = `calc(${(100 / (eventData[i].totalColumns + 1))}% - 12px)`;
+      eventData[i].left = `${(100 / (eventData[i].totalColumns + 1) * eventData[i].column)}%`;
+    }
+    this.styledEvents = eventData;
+  }
 
   getSliceStart(time, small) {
     let sliceStart = (time > 5 ? (time - 8) * 60 : (time + 4) * 60);
@@ -134,12 +142,11 @@ class Calendar extends Component {
 
   getEventsForSlice(sliceStart) {
     let events = [];
-    for (let e of this.state.events) {
+    for (let e of this.styledEvents) {
       if (e.start >= sliceStart && e.start < sliceStart + 30) events.push(e);
     }
     events = events.map(e => {
-      let styles = this.calcEventStyle(e);
-      let ev = { ...e, width: styles.width, left: styles.left };
+      let ev = { ...e };
       if (ev._id === this.state.selectedEventId) {
         ev = { ...ev, selected: true, deleteHandler: this.deleteEventHandler };
       }
@@ -216,7 +223,7 @@ class Calendar extends Component {
         }
       }
     } else {
-      console.log("error with the request");
+      console.log("HTTP request error");
     }
   };
 
@@ -306,7 +313,7 @@ class Calendar extends Component {
   };
 
   render() {
-    console.log('re-render');
+    this.setStyledEvents();
     const timeSlices = this.setupTimeSlices();
     return (
       <div className={classes.Calendar} onClick={this.deselectEventHandler}>

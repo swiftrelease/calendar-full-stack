@@ -99,7 +99,7 @@ class App extends Component {
 
   signOutHandler = () => {
     document.cookie = `authToken=;expires=${new Date(0).toUTCString()}`;
-    this.setState({authorized: false, apiToken: null});
+    this.setState({authorized: false, apiToken: null, authError: null});
   }
 
 
