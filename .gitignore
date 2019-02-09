@@ -8,7 +8,8 @@ node_modules/
 /coverage
 
 # production
-build/
+# ignore to deploy on heroku
+# build/
 
 # misc
 .DS_Store
