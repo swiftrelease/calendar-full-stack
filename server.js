@@ -9,7 +9,7 @@ const apiController = require('./controllers/apiController');
 
 const app = express();
 
-const port = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(express.static(__dirname + '/build'));
 
@@ -29,4 +29,4 @@ authController(app);
 setupController(app);
 apiController(app);
 
-app.listen(port);
+app.listen(PORT);
