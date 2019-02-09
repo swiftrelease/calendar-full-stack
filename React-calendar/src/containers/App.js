@@ -12,8 +12,6 @@ const authUrl = `http://${HOSTNAME}:${PORT}/auth`;
 
 class App extends Component {
 
-  // creds = { admin: 'changeit' };
-
   state = {
     authorized: false,
     authError: null,
@@ -63,22 +61,13 @@ class App extends Component {
       return;
     }
 
-
-    // if (uname in this.creds && this.creds[uname] === pass) {
-    //   this.setState({authorized: true, authError: null});
-    // } else if (uname in this.creds) {
-    //   this.setState({authError: {type: 'pass', message: 'Incorrect password'}});
-    // } else {
-    //   this.setState({authError: {type: 'uname', message: 'User does not exist'}});
-    // }
     let passHash = shajs('sha256').update(pass).digest('hex');
-    // console.log(`payload: ${uname}, ${passHash}`);
+
     let resp = await fetch(authUrl, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({uname, pass: passHash})
     });
-    // console.log(resp);
     if (resp.status === 200) {
       let data = await resp.json();
       if (!data.action || !data.authToken || !data.apiToken) {
@@ -98,9 +87,7 @@ class App extends Component {
         }
       }
     } else {
-
       let data = await resp.json();
-      // console.log(data);
       if (data.error) {
         this.setState({authError: {type: 'pass', message: data.error}});
       } else {

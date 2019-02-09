@@ -43,6 +43,26 @@ class Calendar extends Component {
   async componentDidMount() {
     const eventData = await this.getEventData();
     if (eventData) {
+      for (let evnt of eventData) {
+        let baseWidth = 100;
+        let overlappingEventsNum = 1;
+        let overlappingEvents = [];
+        for (let e of eventData) {
+          if (this.eventsOverlap(evnt, e) && evnt._id !== e._id) {
+                 overlappingEvents.push(e);
+                 overlappingEventsNum++;
+               }
+        }
+        for (let i = 0; i < overlappingEvents.length - 1; i++) {
+          for (let j = i + 1; j < overlappingEvents.length; j++) {
+            if (!this.eventsOverlap(overlappingEvents[i], overlappingEvents[j])) {
+              overlappingEventsNum--;
+            }
+          }
+        }
+        evnt.widthPercent = baseWidth / overlappingEventsNum;
+      }
+
       this.setState({events: eventData});
     }
   }
@@ -54,12 +74,13 @@ class Calendar extends Component {
 
   containsOffsetEvent = (evnt) => {
     for (let e of this.offsetEvents) {
-      if (evnt._id === e.__id) return true;
+      console.log(e._id, evnt._id);
+      if (evnt._id === e._id) return true;
     }
     return false;
   };
 
-  calcEventWidth = (evnt) => {
+  calcEventStyle = (evnt) => {
     let baseWidth = 100;
     let baseOffset = 0;
     let overlappingEventsNum = 1;
@@ -77,7 +98,12 @@ class Calendar extends Component {
         }
       }
     }
-
+    // console.log('event:');
+    // console.log(evnt);
+    // console.log('overlappingEvents:');
+    // console.log(overlappingEvents);
+    // console.log('offsetEvents');
+    // console.log(this.offsetEvents);
     for (let e of overlappingEvents) {
       if ( (evnt.start > e.start) ||
       (evnt.start === e.start && !this.containsOffsetEvent(e)) ) {
@@ -112,7 +138,7 @@ class Calendar extends Component {
       if (e.start >= sliceStart && e.start < sliceStart + 30) events.push(e);
     }
     events = events.map(e => {
-      let styles = this.calcEventWidth(e);
+      let styles = this.calcEventStyle(e);
       let ev = { ...e, width: styles.width, left: styles.left };
       if (ev._id === this.state.selectedEventId) {
         ev = { ...ev, selected: true, deleteHandler: this.deleteEventHandler };
@@ -153,7 +179,9 @@ class Calendar extends Component {
   };
 
   deselectEventHandler = () => {
-    this.setState({selectedEventId: null});
+    if (this.state.selectedEventId) {
+      this.setState({selectedEventId: null});
+    }
   };
 
   addEventButtonClickHandler = () => {
@@ -278,6 +306,7 @@ class Calendar extends Component {
   };
 
   render() {
+    console.log('re-render');
     const timeSlices = this.setupTimeSlices();
     return (
       <div className={classes.Calendar} onClick={this.deselectEventHandler}>

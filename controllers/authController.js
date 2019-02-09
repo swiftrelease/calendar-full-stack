@@ -9,9 +9,7 @@ module.exports = function(app) {
     if(req.body.authToken) {
       Users.findOne({authToken: req.body.authToken}, function(err, user) {
         if(err) throw err;
-        if(!user) {
-          res.status(403).json({error: 'Invalid authToken'});
-        } else {
+        if(user) {
           res.status(200)
              .json({uname: user.uname, apiToken: user.apiToken})
              .end();
