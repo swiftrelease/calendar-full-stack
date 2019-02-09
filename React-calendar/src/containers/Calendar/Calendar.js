@@ -8,10 +8,10 @@ import Button from '../../components/UI/Button/Button';
 import Modal from '../../components/UI/Modal/Modal';
 import AddEventControls from '../../components/AddEventControls/AddEventControls';
 
-const HOSTNAME = 'localhost';
-const PORT = '5000';
+const SOCKET_DEV = 'http://localhost:5000';
+const SOCKET_PROD = 'https://rem-calendar.herokuapp.com'
 
-const apiUrl = `http://${HOSTNAME}:${PORT}/api/calendar`;
+const apiUrl = `${SOCKET_PROD}/api/calendar`;
 
 class Calendar extends Component {
 

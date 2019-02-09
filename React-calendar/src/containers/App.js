@@ -5,10 +5,10 @@ import shajs from 'sha.js';
 import Calendar from './Calendar/Calendar';
 import AuthForm from '../components/AuthForm/AuthForm';
 
-const HOSTNAME = 'localhost';
-const PORT = '5000';
+const SOCKET_DEV = 'http://localhost:5000';
+const SOCKET_PROD = 'https://rem-calendar.herokuapp.com'
 
-const authUrl = `http://${HOSTNAME}:${PORT}/auth`;
+const authUrl = `${SOCKET_PROD}/auth`;
 
 class App extends Component {
 
