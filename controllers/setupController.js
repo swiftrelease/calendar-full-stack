@@ -44,9 +44,9 @@ module.exports = function(app) {
     ];
     const starterUser = {
       uname: 'admin',
-      pass: '00810cf8b94d6fcb9c5de484d3bec4187620b3e2876e59aab90d852fe0f18fb6',
-      authToken: '123',
-      apiToken: '123',
+      pass: '00810cf8b94d6fcb9c5de484d3bec4187620b3e2876e59aab90d852fe0f18fb6', // pass = changeit
+      authToken: '123', // doesn't matter because the tokens will be re-generated
+      apiToken: '123',  // automatically by the server
       events: starterEvents
     }
     Users.create(starterUser, function(err, results) {

@@ -3,13 +3,6 @@ const Users = require('../models/userModel');
 
 
 module.exports = function(app) {
-  app.use((req, res, next) => {
-    res.set('Content-Type', 'application/json');
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
-    res.set('Access-Control-Allow-Headers', 'Content-Type, X-ApiToken');
-    next();
-  });
 
   app.use('/api/*', function(req, res, next) {
     if(!req.headers['x-apitoken'] &&
