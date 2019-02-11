@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import classes from './Calendar.module.css';
 
 import TimeSlice from '../../components/TimeSlice/TimeSlice';
-// import CalendarEvent from '../../components/CalendarEvent/CalendarEvent';
-import AddButton from '../../components/UI/Button/AddButton/AddButton';
 import Button from '../../components/UI/Button/Button';
 import Modal from '../../components/UI/Modal/Modal';
 import AddEventControls from '../../components/AddEventControls/AddEventControls';
@@ -74,62 +72,42 @@ class Calendar extends Component {
       }
     }
 
-    // Store collisions for each event
-    for (let i = 0; i < eventData.length; i++) {
-      eventData[i].overlappingEvents = [];
-      eventData[i].overlappingEventsBefore = [];
-      for (let j = 0; j < eventData.length; j++) {
-        if (this.eventsOverlap(eventData[i], eventData[j])) {
-          eventData[i].overlappingEvents.push(j);
-          if (i > j) eventData[i].overlappingEventsBefore.push(j);
+    // Calculate width based on the number of overlapping events
+    for (let evnt of eventData) {
+      let overlappingEventsNum = 1;
+      let overlappingEvents = [];
+      for (let e of eventData) {
+        if (this.eventsOverlap(evnt, e) && evnt._id !== e._id) {
+           overlappingEvents.push(e);
+           overlappingEventsNum++;
+         }
+      }
+      for (let i = 0; i < overlappingEvents.length - 1; i++) {
+        for (let j = i + 1; j < overlappingEvents.length; j++) {
+          if (!this.eventsOverlap(overlappingEvents[i], overlappingEvents[j])) {
+            overlappingEventsNum--;
+          }
+        }
+      }
+      evnt.widthPercent = 100 / overlappingEventsNum;
+    }
+
+    // Calculate the left position
+    if (eventData[0]) {
+      eventData[0].column = 0;
+    }
+    for (let i = 1; i < eventData.length; i++) {
+      eventData[i].column = 0;
+      for (let j = 0; j < i; j++) {
+        if (this.eventsOverlap(eventData[i], eventData[j]) && eventData[i].column === eventData[j].column) {
+          eventData[i].column++;
         }
       }
     }
 
-    // Magic starts here
-    for (let i = 0; i < eventData.length; i++) {
-      let evnt = eventData[i];
-      if (i > 0 && evnt.overlappingEventsBefore.length > 0) {
-        if (eventData[i - 1].column > 0) {
-          for (let j = 0; j < eventData[i - 1].column; j++) {
-            if (evnt.overlappingEventsBefore.indexOf(i - (j + 2)) === -1) {
-              evnt.column = eventData[i - (j + 2)].column;
-            }
-          }
-          if (typeof evnt.column === 'undefined') evnt.column = eventData[i - 1].column + 1;
-        } else {
-          let column = 0;
-          for (let j = 0; j < evnt.overlappingEventsBefore.length; j++) {
-            if (eventData[evnt.overlappingEventsBefore[evnt.overlappingEventsBefore.length - 1 - j]].column === column) {
-              column++;
-            }
-          }
-          evnt.column = column;
-        }
-      } else {
-        evnt.column = 0;
-      }
-    }
-
-    for (let i = 0; i < eventData.length; i++) {
-      eventData[i].totalColumns = 0;
-      if (eventData[i].overlappingEvents.length > 1) {
-        let conflictGroup=[];
-        let conflictingColumns=[];
-        addConflictsToGroup(eventData[i]);
-        function addConflictsToGroup(e) {
-          for (let k = 0; k < e.overlappingEvents.length; k++) {
-            if (conflictGroup.indexOf(e.overlappingEvents[k]) === -1) {
-              conflictGroup.push(e.overlappingEvents[k]);
-              conflictingColumns.push(eventData[e.overlappingEvents[k]].column);
-              addConflictsToGroup(eventData[e.overlappingEvents[k]]);
-            }
-          }
-        }
-        eventData[i].totalColumns = Math.max(...conflictingColumns);
-      }
-      eventData[i].width = `calc(${(100 / (eventData[i].totalColumns + 1))}% - 12px)`;
-      eventData[i].left = `${(100 / (eventData[i].totalColumns + 1) * eventData[i].column)}%`;
+    for (let e of eventData) {
+      e.left = `${e.column * e.widthPercent}%`;
+      e.width = `calc(${e.widthPercent}% - 12px)`;
     }
     this.styledEvents = eventData;
   }
@@ -333,7 +311,7 @@ class Calendar extends Component {
         {timeSlices}
         <Button click={this.props.signOut} classes={['White', 'SignOut']}> Sign Out </Button>
         <Button click={this.exportJsonHandler} classes={['White', 'Export']}> ⇩ </Button>
-        <AddButton click={this.addEventButtonClickHandler} />
+        <Button click={this.addEventButtonClickHandler} classes={['AddButton']}> + </Button>
       </div>
     );
   }

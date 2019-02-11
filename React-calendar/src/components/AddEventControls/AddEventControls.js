@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import './AddEventControls.css';
 
 import Aux from '../../hoc/Auxiliary';

@@ -15,7 +15,8 @@ class App extends Component {
   state = {
     authorized: false,
     authError: null,
-    apiToken: null
+    apiToken: null,
+    ready: false
   };
 
   componentDidMount = async () => {
@@ -37,8 +38,10 @@ class App extends Component {
     if (resp.status === 200) {
       let data = await resp.json();
       if (data.uname && data.apiToken) {
-        this.setState({authorized: true, uname: data.uname, apiToken: data.apiToken});
+        this.setState({authorized: true, apiToken: data.apiToken, ready: true});
       }
+    } else {
+      this.setState({ready: true});
     }
   }
 
@@ -105,19 +108,21 @@ class App extends Component {
 
   render() {
     return (
-      <div className={classes.App}>
-        { this.state.authorized ?
-          <Calendar
-            timeStart={8}
-            timeSlicesAmount={19}
-            apiToken={this.state.apiToken}
-            signOut={this.signOutHandler}
-          /> :
-          <AuthForm
-            error={this.state.authError}
-            authorize={this.authorizationHandler}
-          /> }
-      </div>
+      this.state.ready ? (
+        <div className={classes.App}>
+          { this.state.authorized ?
+            <Calendar
+              timeStart={8}
+              timeSlicesAmount={19}
+              apiToken={this.state.apiToken}
+              signOut={this.signOutHandler}
+            /> :
+            <AuthForm
+              error={this.state.authError}
+              authorize={this.authorizationHandler}
+            /> }
+        </div>
+      ) : null
     );
   }
 }
