@@ -9,7 +9,7 @@ node_modules/
 
 # production
 # ignore to deploy on heroku
-build/
+# build/
 
 # misc
 .DS_Store

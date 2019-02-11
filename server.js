@@ -11,7 +11,7 @@ const app = express();
 
 const PORT = process.env.PORT || 5000;
 
-app.use(express.static(__dirname + '/build'));
+app.use(express.static(__dirname + '/React-calendar/build'));
 
 app.use((req, res, next) => {
   res.set('Content-Type', 'application/json');
