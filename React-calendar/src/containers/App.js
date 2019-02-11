@@ -28,7 +28,10 @@ class App extends Component {
         break;
       }
     }
-    if (!authToken) return;
+    if (!authToken) {
+      this.setState({ready: true});
+      return;
+    }
 
     let resp = await fetch(authUrl, {
       method: 'POST',
