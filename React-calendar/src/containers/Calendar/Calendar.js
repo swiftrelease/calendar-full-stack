@@ -9,7 +9,7 @@ import AddEventControls from '../../components/AddEventControls/AddEventControls
 const SOCKET_DEV = 'http://localhost:5000';
 const SOCKET_PROD = 'https://rem-calendar.herokuapp.com'
 
-const apiUrl = `${SOCKET_PROD}/api/calendar`;
+const apiUrl = `${SOCKET_DEV}/api/calendar`;
 
 class Calendar extends Component {
 

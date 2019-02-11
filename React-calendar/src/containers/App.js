@@ -8,7 +8,7 @@ import AuthForm from '../components/AuthForm/AuthForm';
 const SOCKET_DEV = 'http://localhost:5000';
 const SOCKET_PROD = 'https://rem-calendar.herokuapp.com'
 
-const authUrl = `${SOCKET_PROD}/auth`;
+const authUrl = `${SOCKET_DEV}/auth`;
 
 class App extends Component {
 
