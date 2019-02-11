@@ -24,3 +24,7 @@ Calendar app with React, Express, MongoDB
 2. Build the static content for the React app with `npm run build`;
 3. Start `server.js` in Node (`node server.js`);
 4. The prod build is available at http://localhost:5000
+
+## Access
+
+The default events are set up for the following user: `admin`:`changeit`
