@@ -15,6 +15,7 @@ module.exports = function(app) {
              .end();
         }
       });
+      res.status(401).end();
       return;
     }
 
