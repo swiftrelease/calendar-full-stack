@@ -11,14 +11,14 @@ Calendar app with React, Express, MongoDB
 
 ## Usage
 
-### Dev
+### Dev server
 
 1. Run `npm i` in the app root and in `React-calendar`;
 2. Launch `server.js` in Node (`node server.js`);
 3. Start the `create-react-app` dev server (`npm start` in the `React-calendar` dir);
 4. The dev build is available at http://localhost:3000
 
-### Prod
+### Deployment build
 
 1. Run `npm i` in the app root and in `React-calendar`;
 2. Build the static content for the React app with `npm run build`;
